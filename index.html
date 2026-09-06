@@ -4,176 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TRIANGLE AGENCY // PORTAL DE ACESSO</title>
-  <style>
-    /* Cursor Padrão Pixelado (Seta da Imagem) */
-    * {
-      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" shape-rendering="crispEdges"><path fill="%23000000" d="M1,0 H3 V1 H4 V2 H5 V3 H6 V4 H7 V5 H8 V6 H9 V7 H10 V8 H11 V9 H12 V10 H13 V11 H14 V12 H15 V13 H16 V14 H17 V15 H1 V0 Z M2,15 H8 V16 H9 V17 H10 V18 H11 V20 H8 V18 H7 V17 H6 V16 H2 V15 Z M10,13 H13 V14 H10 Z"/><path fill="%23ffffff" d="M2,2 V14 H6 V13 H7 V12 H8 V11 H9 V10 H10 V9 H11 V8 H12 V7 H13 V6 H14 V5 H15 V4 H2 Z M7,13 H8 V15 H7 Z M8,15 H9 V17 H8 Z"/></svg>'), auto;
-    }
-
-    /* Cursor Interativo Pixelado (Mão Apontando da Imagem) */
-    a, button, input, .interactive {
-      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" shape-rendering="crispEdges"><path fill="%23000000" d="M7,0 H10 V6 H11 V4 H13 V6 H14 V4 H16 V6 H17 V7 H19 V15 H18 V17 H17 V18 H15 V19 H7 V18 H5 V15 H4 V8 H7 V0 Z"/><path fill="%23ffffff" d="M8,1 H9 V9 H8 Z M11,5 H12 V9 H11 Z M14,5 H15 V9 H14 Z M17,8 H18 V14 H17 Z M5,9 H6 V14 H5 Z M6,10 H17 V17 H6 Z"/></svg>'), pointer !important;
-    }
-
-    /* Variaveis de Cores (Tema Claro Vintage) */
-    :root {
-      --bg-color: #f7f5f0;
-      --card-bg: #ffffff;
-      --text-color: #2b2b2a;
-      --border-color: #d1ccc0;
-      --shadow-color: #e2ded4;
-      
-      --agency-color: #b83232;  /* Vermelho: Agência */
-      --anomaly-color: #2b6cb0; /* Azul: Anomalias */
-      --mundane-color: #d69e2e; /* Amarelo: Mundano */
-    }
-
-    /* Override para Modo Escuro */
-    body.dark-mode {
-      --bg-color: #121315;
-      --card-bg: #1e2024;
-      --text-color: #e1e1e0;
-      --border-color: #343840;
-      --shadow-color: #08090a;
-      
-      --agency-color: #e54d4d;
-      --anomaly-color: #4299e1;
-      --mundane-color: #ecc94b;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Courier New', Courier, monospace;
-      padding: 30px;
-      max-width: 850px;
-      margin: 0 auto;
-      transition: background-color 0.2s, color 0.2s;
-    }
-
-    /* Botão de Modo Escuro no Canto */
-    .theme-toggle {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      background: var(--card-bg);
-      border: 2px solid var(--text-color);
-      color: var(--text-color);
-      padding: 6px 12px;
-      font-weight: bold;
-      font-size: 0.8rem;
-      box-shadow: 2px 2px 0px var(--shadow-color);
-    }
-
-    /* Tela de Login */
-    .login-box {
-      background: var(--card-bg);
-      border: 2px solid var(--agency-color);
-      padding: 30px;
-      max-width: 400px;
-      margin: 80px auto;
-      box-shadow: 6px 6px 0px var(--shadow-color);
-      text-align: center;
-    }
-
-    .login-box h2 {
-      color: var(--agency-color);
-      margin-top: 0;
-    }
-
-    .input-group {
-      margin-bottom: 15px;
-      text-align: left;
-    }
-
-    .input-group label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .input-group input {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-      border: 1px solid var(--border-color);
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-family: monospace;
-    }
-
-    .btn-login {
-      background-color: var(--agency-color);
-      color: #ffffff;
-      border: none;
-      padding: 10px 20px;
-      font-weight: bold;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    /* Cabeçalho do Portal */
-    .header {
-      background-color: var(--card-bg);
-      border: 2px solid var(--agency-color);
-      padding: 20px;
-      margin-bottom: 25px;
-      box-shadow: 4px 4px 0px var(--shadow-color);
-    }
-
-    h1 {
-      color: var(--agency-color);
-      margin: 0 0 5px 0;
-      font-size: 1.8rem;
-    }
-
-    .user-bar {
-      font-size: 0.85rem;
-      font-weight: bold;
-      border-top: 1px dashed var(--border-color);
-      margin-top: 10px;
-      padding-top: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    /* Cartões de Conteúdo */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 3px 3px 0px var(--shadow-color);
-    }
-
-    .agency-border { border-left: 6px solid var(--agency-color); }
-    .anomaly-border { border-left: 6px solid var(--anomaly-color); }
-    .mundane-border { border-left: 6px solid var(--mundane-color); }
-
-    .agency-tag { background-color: var(--agency-color); color: #fff; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; }
-    .anomaly-tag { background-color: var(--anomaly-color); color: #fff; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; }
-    .mundane-tag { background-color: var(--mundane-color); color: #000; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; }
-
-    .redacted {
-      background-color: var(--text-color);
-      color: var(--text-color);
-      padding: 0 4px;
-      transition: all 0.2s ease;
-    }
-    .redacted:hover {
-      background-color: var(--shadow-color);
-      color: var(--agency-color);
-    }
-
-    .hidden { display: none; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <button class="theme-toggle" onclick="toggleTheme()">MODO ESCURO</button>
 
-  <!-- TELA DE LOGIN (Inicial) -->
+  <!-- TELA DE LOGIN -->
   <div id="login-screen" class="login-box">
     <h2>▲ TRIANGLE AGENCY</h2>
     <p style="font-size: 0.8rem;">AUTENTICAÇÃO DE FUNCIONÁRIO</p>
@@ -191,7 +28,7 @@
     </form>
   </div>
 
-  <!-- PORTAL INTERNO (Visível após login) -->
+  <!-- PORTAL INTERNO -->
   <div id="portal-screen" class="hidden">
     <div class="header">
       <h1>▲ TRIANGLE AGENCY</h1>
@@ -201,50 +38,61 @@
       </div>
     </div>
 
-    <!-- Seção Agência (Vermelho) -->
+    <!-- MENU DE ABAS DE NAVEGAÇÃO -->
+    <nav class="nav-menu">
+      <a href="index.html" class="nav-link active">INÍCIO</a>
+      <a href="relatorios.html" class="nav-link">ANOMALIAS</a>
+      <a href="agentes.html" class="nav-link">EQUIPE</a>
+    </nav>
+
+    <!-- Conteúdo da Página Inicial -->
     <div class="card agency-border">
       <span class="agency-tag">DIRETRIZ DA AGÊNCIA</span>
-      <h3 style="color: var(--agency-color); margin-top: 10px;">Política de Estabilidade</h3>
-      <p>Sua eficiência é o pilar da nossa organização. Lembre-se de preencher seus relatórios antes do fim do expediente.</p>
+      <h3 style="color: var(--agency-color); margin-top: 10px;">Bem-vindo ao Sistema Interno</h3>
+      <p>Utilize as abas acima para navegar pelos relatórios e arquivos de pessoal. Lembre-se de manter a confidencialidade fora do expediente.</p>
     </div>
 
-    <!-- Seção Anomalia (Azul) -->
-    <div class="card anomaly-border">
-      <span class="anomaly-tag">RELATÓRIO DE ANOMALIA</span>
-      <h3 style="color: var(--anomaly-color); margin-top: 10px;">Objeto #089 - O Lápis Infinito</h3>
-      <p><strong>Descrição:</strong> O objeto produz grafite sem desgaste, mas altera memórias recentes dos usuários.</p>
-      <p><strong>Status:</strong> <span class="redacted">AGUARDANDO COLETOR</span></p>
-    </div>
-
-    <!-- Seção Mundano (Amarelo) -->
     <div class="card mundane-border">
       <span class="mundane-tag">AVISO MUNDANO</span>
-      <h3 style="color: var(--mundane-color); margin-top: 10px;">Cafeteria do 2º Andar</h3>
-      <p>A máquina de espresso foi consertada. Favor utilizar apenas copos de papel homologados pela empresa.</p>
+      <h3 style="color: var(--mundane-color); margin-top: 10px;">Aviso da Gerência</h3>
+      <p>A taxa de uso das canetas corporativas no 3º andar excedeu a cota mensal. Solicita-se moderação.</p>
     </div>
   </div>
 
   <script>
-    // Função para simular o Login
     function autenticarAgente(event) {
       event.preventDefault();
       const inputId = document.getElementById('agent-id').value;
+      localStorage.setItem('triangle_user', inputId.toUpperCase());
       
       document.getElementById('logged-user-id').innerText = inputId.toUpperCase();
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('portal-screen').classList.remove('hidden');
     }
 
-    // Função para Alternar Modo Escuro
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
-      const btn = document.querySelector('.theme-toggle');
-      if (document.body.classList.contains('dark-mode')) {
-        btn.innerText = 'MODO CLARO';
-      } else {
-        btn.innerText = 'MODO ESCURO';
-      }
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('triangle_theme', isDark ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').innerText = isDark ? 'MODO CLARO' : 'MODO ESCURO';
     }
+
+    // Mantém a sessão ativa e o tema ao navegar entre abas
+    window.onload = function() {
+      const savedUser = localStorage.getItem('triangle_user');
+      const savedTheme = localStorage.getItem('triangle_theme');
+      
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle').innerText = 'MODO CLARO';
+      }
+      
+      if (savedUser) {
+        document.getElementById('logged-user-id').innerText = savedUser;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('portal-screen').classList.remove('hidden');
+      }
+    };
   </script>
 
 </body>
