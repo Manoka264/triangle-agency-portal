@@ -181,6 +181,67 @@ h1 { color: var(--agency-color); margin: 0 0 5px 0; font-size: 1.6rem; }
   font-weight: bold;
 }
 
+/* Novas tags de status e anexos */
+.status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border: 1px solid var(--border-color);
+  margin-left: 5px;
+}
+.status-andamento { background-color: var(--mundane-color); color: #000; }
+.status-concluida { background-color: var(--anomaly-color); color: #fff; }
+
+.checkbox-list {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 0.85rem;
+}
+
+.report-img {
+  max-width: 100%;
+  height: auto;
+  border: 2px solid var(--border-color);
+  margin-top: 10px;
+  box-shadow: 2px 2px 0px var(--shadow-color);
+}
+
+.manager-feedback-box {
+  background: rgba(184, 50, 50, 0.08);
+  border-left: 4px solid var(--agency-color);
+  padding: 10px;
+  margin-top: 10px;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.btn-danger {
+  background: #b83232;
+  color: #fff;
+  border: none;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+.btn-action {
+  background: var(--anomaly-color);
+  color: #fff;
+  border: none;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
 .hidden { display: none !important; }
 
 /* REGRAS MOBILE (Telas < 600px) */
