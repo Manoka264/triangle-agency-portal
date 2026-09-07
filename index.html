@@ -18,7 +18,7 @@
     <form onsubmit="autenticarAgente(event)">
       <div class="input-group">
         <label for="agent-id">ID DO FUNCIONÁRIO:</label>
-        <input type="text" id="agent-id" placeholder="Ex: AGENTE-402" required>
+        <input type="text" id="agent-id" placeholder="Ex: AG-7042" required>
       </div>
       <div class="input-group">
         <label for="passcode">CHAVE DE ACESSO:</label>
@@ -34,7 +34,10 @@
       <h1>▲ TRIANGLE AGENCY</h1>
       <div class="user-bar">
         <span>USUÁRIO: <strong id="logged-user-id" style="color: var(--agency-color);">---</strong></span>
-        <span>NÍVEL DE ACESSO: <strong style="color: var(--agency-color);">NÍVEL 1 (JÚNIOR)</strong></span>
+        <div>
+          <span>NÍVEL DE ACESSO: <strong id="logged-clearance" style="color: var(--agency-color);">---</strong></span>
+          <button onclick="logout()" class="btn-logout">SAIR [X]</button>
+        </div>
       </div>
     </div>
 
@@ -46,184 +49,99 @@
     </nav>
 
     <!-- Conteúdo da Página Inicial -->
-    <div class="card agency-border">
+    <div class="card agency-border" data-min-clearance="1">
       <span class="agency-tag">DIRETRIZ DA AGÊNCIA</span>
       <h3 style="color: var(--agency-color); margin-top: 10px;">Bem-vindo ao Sistema Interno</h3>
       <p>Utilize as abas acima para navegar pelos relatórios e arquivos de pessoal. Lembre-se de manter a confidencialidade fora do expediente.</p>
     </div>
 
-    <div class="card mundane-border">
+    <div class="card mundane-border" data-min-clearance="1">
       <span class="mundane-tag">AVISO MUNDANO</span>
       <h3 style="color: var(--mundane-color); margin-top: 10px;">Aviso da Gerência</h3>
       <p>A taxa de uso das canetas corporativas no 3º andar excedeu a cota mensal. Solicita-se moderação.</p>
     </div>
+
+    <!-- Exemplo de cartão exclusivo para Nível 3 (Supervisores) -->
+    <div class="card anomaly-border" data-min-clearance="3">
+      <span class="anomaly-tag">CONFIDENCIAL // GERÊNCIA</span>
+      <h3 style="color: var(--anomaly-color); margin-top: 10px;">Aviso de Segurança Nível 3</h3>
+      <p>Apenas supervisores conseguem ler este aviso no portal.</p>
+    </div>
   </div>
 
-  <!-- Carrega o banco de dados de usuários antes dos scripts de tela -->
+  <!-- Carrega o banco de dados de usuários externo -->
   <script src="usuarios.js"></script>
 
-<script>
-  function autenticarAgente(event) {
-    event.preventDefault();
-    
-    const inputId = document.getElementById('agent-id').value.trim().toUpperCase();
-    const inputPass = document.getElementById('passcode').value.trim();
-
-    // Valida com base nos dados do usuarios.js
-    if (typeof AGENTES_AUTORIZADOS !== 'undefined' && AGENTES_AUTORIZADOS[inputId] && AGENTES_AUTORIZADOS[inputId].passcode === inputPass) {
-      const agente = AGENTES_AUTORIZADOS[inputId];
+  <!-- Script Principal de Funcionamento -->
+  <script>
+    function autenticarAgente(event) {
+      event.preventDefault();
       
-      localStorage.setItem('triangle_user_id', inputId);
-      localStorage.setItem('triangle_user_name', agente.nome);
-      localStorage.setItem('triangle_user_clearance', agente.clearance);
-      localStorage.setItem('triangle_user_cargo', agente.cargo);
+      const inputId = document.getElementById('agent-id').value.trim().toUpperCase();
+      const inputPass = document.getElementById('passcode').value.trim();
 
-      carregarPainel(agente);
-    } else {
-      alert("ACESSO NEGADO // CREDENCIAIS INVÁLIDAS");
-    }
-  }
+      // Valida com base nos dados do usuarios.js
+      if (typeof AGENTES_AUTORIZADOS !== 'undefined' && AGENTES_AUTORIZADOS[inputId] && AGENTES_AUTORIZADOS[inputId].passcode === inputPass) {
+        const agente = AGENTES_AUTORIZADOS[inputId];
+        
+        localStorage.setItem('triangle_user_id', inputId);
+        localStorage.setItem('triangle_user_name', agente.nome);
+        localStorage.setItem('triangle_user_clearance', agente.clearance);
+        localStorage.setItem('triangle_user_cargo', agente.cargo);
 
-  function carregarPainel(agente) {
-    document.getElementById('logged-user-id').innerText = `${agente.nome} (${agente.cargo})`;
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('portal-screen').classList.remove('hidden');
-
-    aplicarRestricoesDeAcesso(agente.clearance);
-  }
-
-  function aplicarRestricoesDeAcesso(clearance) {
-    const elementosRestritos = document.querySelectorAll('[data-min-clearance]');
-    
-    elementosRestritos.forEach(el => {
-      const nivelExigido = parseInt(el.getAttribute('data-min-clearance'));
-      if (clearance < nivelExigido) {
-        el.style.display = 'none';
+        carregarPainel(agente);
       } else {
-        el.style.display = 'block';
+        alert("ACESSO NEGADO // CREDENCIAIS INVÁLIDAS");
       }
-    });
-  }
-
-  function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('triangle_theme', isDark ? 'dark' : 'light');
-    document.querySelector('.theme-toggle').innerText = isDark ? 'MODO CLARO' : 'MODO ESCURO';
-  }
-
-  window.onload = function() {
-    const savedTheme = localStorage.getItem('triangle_theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-      document.querySelector('.theme-toggle').innerText = 'MODO CLARO';
     }
 
-    const savedId = localStorage.getItem('triangle_user_id');
-    if (savedId && typeof AGENTES_AUTORIZADOS !== 'undefined' && AGENTES_AUTORIZADOS[savedId]) {
-      carregarPainel(AGENTES_AUTORIZADOS[savedId]);
-    }
-  };
-</script>
-
-<script>
-  // BANCO DE DADOS DOS AGENTES (Edite IDs, Senhas e Níveis aqui)
-  const AGENTES_AUTORIZADOS = {
-    "AGENTE-1": {
-      passcode: "1234",
-      nome: "Agente Silva",
-      clearance: 1,
-      cargo: "Coletor Jr."
-    },
-    "AGENTE-2": {
-      passcode: "4321",
-      nome: "Agente Rocha",
-      clearance: 2,
-      cargo: "Especialista de Campo"
-    },
-    "SUPERVISOR": {
-      passcode: "delta99",
-      nome: "Supervisor Vance",
-      clearance: 3,
-      cargo: "Gerente de Filial"
-    }
-  };
-
-  function autenticarAgente(event) {
-    event.preventDefault();
-    
-    const inputId = document.getElementById('agent-id').value.trim().toUpperCase();
-    const inputPass = document.getElementById('passcode').value.trim();
-    const errorMsg = document.getElementById('login-error');
-
-    // Verifica se o agente existe e a senha coincide
-    if (AGENTES_AUTORIZADOS[inputId] && AGENTES_AUTORIZADOS[inputId].passcode === inputPass) {
-      const agente = AGENTES_AUTORIZADOS[inputId];
+    function carregarPainel(agente) {
+      document.getElementById('logged-user-id').innerText = `${agente.nome} (${agente.cargo})`;
+      document.getElementById('logged-clearance').innerText = `NÍVEL ${agente.clearance}`;
       
-      // Salva os dados da sessão no navegador
-      localStorage.setItem('triangle_user_id', inputId);
-      localStorage.setItem('triangle_user_name', agente.nome);
-      localStorage.setItem('triangle_user_clearance', agente.clearance);
-      localStorage.setItem('triangle_user_cargo', agente.cargo);
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('portal-screen').classList.remove('hidden');
 
-      carregarPainel(agente);
-    } else {
-      // Exibe erro de acesso
-      errorMsg.classList.remove('hidden');
+      aplicarRestricoesDeAcesso(agente.clearance);
     }
-  }
 
-  function carregarPainel(agente) {
-    document.getElementById('logged-user-id').innerText = `${agente.nome} (${agente.cargo})`;
-    document.getElementById('logged-clearance').innerText = `NÍVEL ${agente.clearance}`;
-    
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('portal-screen').classList.remove('hidden');
+    function aplicarRestricoesDeAcesso(clearance) {
+      const elementosRestritos = document.querySelectorAll('[data-min-clearance]');
+      
+      elementosRestritos.forEach(el => {
+        const nivelExigido = parseInt(el.getAttribute('data-min-clearance'));
+        if (clearance < nivelExigido) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = 'block';
+        }
+      });
+    }
 
-    // Aplica as restrições visuais do nível do agente
-    aplicarRestricoesDeAcesso(agente.clearance);
-  }
+    function logout() {
+      localStorage.clear();
+      window.location.reload();
+    }
 
-  function aplicarRestricoesDeAcesso(clearance) {
-    // Esconde elementos que exigem nível superior ao do jogador
-    const elementosRestritos = document.querySelectorAll('[data-min-clearance]');
-    
-    elementosRestritos.forEach(el => {
-      const nivelExigido = parseInt(el.getAttribute('data-min-clearance'));
-      if (clearance < nivelExigido) {
-        el.style.display = 'none'; // Some com o conteúdo não autorizado
-      } else {
-        el.style.display = 'block';
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('triangle_theme', isDark ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').innerText = isDark ? 'MODO CLARO' : 'MODO ESCURO';
+    }
+
+    window.onload = function() {
+      const savedTheme = localStorage.getItem('triangle_theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle').innerText = 'MODO CLARO';
       }
-    });
-  }
 
-  function logout() {
-    localStorage.clear();
-    window.location.reload();
-  }
-
-  function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('triangle_theme', isDark ? 'dark' : 'light');
-    document.querySelector('.theme-toggle').innerText = isDark ? 'MODO CLARO' : 'MODO ESCURO';
-  }
-
-  // Restaura a sessão ao carregar ou navegar
-  window.onload = function() {
-    const savedTheme = localStorage.getItem('triangle_theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-      document.querySelector('.theme-toggle').innerText = 'MODO CLARO';
-    }
-
-    const savedId = localStorage.getItem('triangle_user_id');
-    if (savedId && AGENTES_AUTORIZADOS[savedId]) {
-      carregarPainel(AGENTES_AUTORIZADOS[savedId]);
-    }
-  };
-</script>
-
+      const savedId = localStorage.getItem('triangle_user_id');
+      if (savedId && typeof AGENTES_AUTORIZADOS !== 'undefined' && AGENTES_AUTORIZADOS[savedId]) {
+        carregarPainel(AGENTES_AUTORIZADOS[savedId]);
+      }
+    };
+  </script>
 </body>
 </html>
