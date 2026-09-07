@@ -240,7 +240,7 @@ h1 { color: var(--agency-color); margin: 0 0 5px 0; font-size: 1.6rem; }
   padding: 4px 8px;
   font-size: 0.75rem;
   font-weight: bold;
-}
+} 
 
 .hidden { display: none !important; }
 
