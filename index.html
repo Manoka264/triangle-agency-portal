@@ -5,17 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TRIANGLE AGENCY // PORTAL DE ACESSO</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Estilos da Tela de Loading Temática */
+    .loading-box {
+      background: var(--card-bg);
+      border: 2px solid var(--agency-color);
+      padding: 40px;
+      max-width: 450px;
+      margin: 80px auto;
+      box-shadow: 6px 6px 0px var(--shadow-color);
+      text-align: center;
+    }
+
+    .triangle-spinner {
+      font-size: 4rem;
+      color: var(--agency-color);
+      display: inline-block;
+      animation: trianglePulse 1.2s infinite ease-in-out;
+      margin-bottom: 15px;
+    }
+
+    @keyframes trianglePulse {
+      0% { transform: scale(1) rotate(0deg); opacity: 0.4; }
+      50% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+      100% { transform: scale(1) rotate(360deg); opacity: 0.4; }
+    }
+
+    .loading-status {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--agency-color);
+      letter-spacing: 1px;
+      min-height: 24px;
+    }
+  </style>
 </head>
 <body>
 
   <button class="theme-toggle" onclick="toggleTheme()">MODO ESCURO</button>
 
-  <!-- TELA DE LOGIN -->
+  <!-- 1. TELA DE LOGIN -->
   <div id="login-screen" class="login-box">
     <h2>▲ TRIANGLE AGENCY</h2>
     <p style="font-size: 0.8rem;">AUTENTICAÇÃO DE FUNCIONÁRIO</p>
     
-    <form onsubmit="autenticarAgente(event)">
+    <form onsubmit="iniciarLogin(event)">
       <div class="input-group">
         <label for="agent-id">ID DO FUNCIONÁRIO:</label>
         <input type="text" id="agent-id" placeholder="Ex: AG-7042" required>
@@ -28,7 +62,14 @@
     </form>
   </div>
 
-  <!-- PORTAL INTERNO -->
+  <!-- 2. TELA DE LOADING (TRIÂNGULO PROCESSANDO) -->
+  <div id="loading-screen" class="loading-box hidden">
+    <div class="triangle-spinner">▲</div>
+    <h2>PROCESSANDO...</h2>
+    <div id="loading-status" class="loading-status">VERIFICANDO LEALDADE DA MENTE...</div>
+  </div>
+
+  <!-- 3. PORTAL INTERNO -->
   <div id="portal-screen" class="hidden">
     <div class="header">
       <h1>▲ TRIANGLE AGENCY</h1>
@@ -55,13 +96,14 @@
       <p>Utilize as abas acima para navegar pelos relatórios e arquivos de pessoal. Lembre-se de manter a confidencialidade fora do expediente.</p>
     </div>
 
+    <!-- AVISO MUNDANO DINÂMICO -->
     <div class="card mundane-border" data-min-clearance="1">
-      <span class="mundane-tag">AVISO MUNDANO</span>
-      <h3 style="color: var(--mundane-color); margin-top: 10px;">Aviso da Gerência</h3>
-      <p>A taxa de uso das canetas corporativas no 3º andar excedeu a cota mensal. Solicita-se moderação.</p>
+      <span class="mundane-tag">BOLETIM DE ROTINA CIVIL</span>
+      <h3 style="color: var(--mundane-color); margin-top: 10px;">Aviso Corporativo do Dia</h3>
+      <p id="texto-aviso-mundano">Carregando diretriz diária...</p>
     </div>
 
-    <!-- Exemplo de cartão exclusivo para Nível 3 (Supervisores) -->
+    <!-- Exemplo para Nível 3 (Supervisores) -->
     <div class="card anomaly-border" data-min-clearance="3">
       <span class="anomaly-tag">CONFIDENCIAL // GERÊNCIA</span>
       <h3 style="color: var(--anomaly-color); margin-top: 10px;">Aviso de Segurança Nível 3</h3>
@@ -69,27 +111,69 @@
     </div>
   </div>
 
-  <!-- Carrega o banco de dados de usuários externo -->
+  <!-- Banco de dados de usuários -->
   <script src="usuarios.js"></script>
 
-  <!-- Script Principal de Funcionamento -->
+  <!-- Scripts do Portal -->
   <script>
-    function autenticarAgente(event) {
+    // LISTA DE AVISOS MUNDANOS ABSURDOS
+    const AVISOS_MUNDANOS = [
+      "Favor não armazenar marmitas contendo peixe ou conceitos abstratos na geladeira comunitária do 2º andar.",
+      "Lembrete: O café da máquina é cortesia da empresa. Se ele começar a sussurrar seu nome em latim, descarte o copo no lixo reciclável.",
+      "As reuniões de alinhamento às sextas-feiras foram movidas para a quarta dimensão. Favor trazerem seus próprios crachás de ancoragem.",
+      "Solicita-se que os funcionários parem de tentar 'fazer amizade' com a fotocopiadora. Ela é apenas um eletrodoméstico (por enquanto).",
+      "O RH informa: Chorar no banheiro é permitido apenas durante o horário de almoço ou em blocos de 5 minutos devidamente apontados no ponto.",
+      "Aviso da Limpeza: Não usem o elevador número 3. Ele atualmente só leva a instâncias do ano de 1974.",
+      "Lembrete de RH: Elogiar a Agência em voz alta ao menos 3 vezes ao dia melhora o clima organizacional e reduz acidentes corporativos.",
+      "Por favor, mantenham a porta do arquivo mortuário trancada. Os papéis velhos não gostam de correntes de ar e tendem a se mover.",
+      "A taxa de uso de canetas corporativas excedeu a cota. Lembre-se: Roubar material da Agência é roubar de si mesmo."
+    ];
+
+    const MENSAGENS_LOADING = [
+      "VERIFICANDO LEALDADE DA MENTE...",
+      "CALIBRANDO NÍVEL DE LIMPEZA DE MEMÓRIA...",
+      "CONSULTANDO A DIRETORIA DA AGÊNCIA...",
+      "SINCRONIZANDO COM A MATRIZ..."
+    ];
+
+    function sortearAvisoMundano() {
+      const index = Math.floor(Math.random() * AVISOS_MUNDANOS.length);
+      document.getElementById('texto-aviso-mundano').innerText = AVISOS_MUNDANOS[index];
+    }
+
+    function iniciarLogin(event) {
       event.preventDefault();
       
       const inputId = document.getElementById('agent-id').value.trim().toUpperCase();
       const inputPass = document.getElementById('passcode').value.trim();
 
-      // Valida com base nos dados do usuarios.js
       if (typeof AGENTES_AUTORIZADOS !== 'undefined' && AGENTES_AUTORIZADOS[inputId] && AGENTES_AUTORIZADOS[inputId].passcode === inputPass) {
         const agente = AGENTES_AUTORIZADOS[inputId];
         
-        localStorage.setItem('triangle_user_id', inputId);
-        localStorage.setItem('triangle_user_name', agente.nome);
-        localStorage.setItem('triangle_user_clearance', agente.clearance);
-        localStorage.setItem('triangle_user_cargo', agente.cargo);
+        // Esconde o Login e Exibe o Loading do Triângulo
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('loading-screen').classList.remove('hidden');
 
-        carregarPainel(agente);
+        // Alterna mensagens durante o loading
+        let msgIndex = 0;
+        const statusEl = document.getElementById('loading-status');
+        const interval = setInterval(() => {
+          msgIndex = (msgIndex + 1) % MENSAGENS_LOADING.length;
+          statusEl.innerText = MENSAGENS_LOADING[msgIndex];
+        }, 600);
+
+        // Tempo total do loading antes de entrar no portal (2.2 segundos)
+        setTimeout(() => {
+          clearInterval(interval);
+          localStorage.setItem('triangle_user_id', inputId);
+          localStorage.setItem('triangle_user_name', agente.nome);
+          localStorage.setItem('triangle_user_clearance', agente.clearance);
+          localStorage.setItem('triangle_user_cargo', agente.cargo);
+
+          document.getElementById('loading-screen').classList.add('hidden');
+          carregarPainel(agente);
+        }, 2200);
+
       } else {
         alert("ACESSO NEGADO // CREDENCIAIS INVÁLIDAS");
       }
@@ -102,6 +186,7 @@
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('portal-screen').classList.remove('hidden');
 
+      sortearAvisoMundano();
       aplicarRestricoesDeAcesso(agente.clearance);
     }
 
