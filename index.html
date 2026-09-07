@@ -5,46 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TRIANGLE AGENCY // PORTAL DE ACESSO</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* Estilos da Tela de Loading Temática */
-    .loading-box {
-      background: var(--card-bg);
-      border: 2px solid var(--agency-color);
-      padding: 40px;
-      max-width: 450px;
-      margin: 80px auto;
-      box-shadow: 6px 6px 0px var(--shadow-color);
-      text-align: center;
-    }
-
-    .triangle-spinner {
-      font-size: 4rem;
-      color: var(--agency-color);
-      display: inline-block;
-      animation: trianglePulse 1.2s infinite ease-in-out;
-      margin-bottom: 15px;
-    }
-
-    @keyframes trianglePulse {
-      0% { transform: scale(1) rotate(0deg); opacity: 0.4; }
-      50% { transform: scale(1.3) rotate(180deg); opacity: 1; }
-      100% { transform: scale(1) rotate(360deg); opacity: 0.4; }
-    }
-
-    .loading-status {
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: var(--agency-color);
-      letter-spacing: 1px;
-      min-height: 24px;
-    }
-  </style>
 </head>
 <body>
 
   <button class="theme-toggle" onclick="toggleTheme()">MODO ESCURO</button>
 
-  <!-- 1. TELA DE LOGIN -->
+  <!-- TELA DE LOGIN -->
   <div id="login-screen" class="login-box">
     <h2>▲ TRIANGLE AGENCY</h2>
     <p style="font-size: 0.8rem;">AUTENTICAÇÃO DE FUNCIONÁRIO</p>
@@ -62,78 +28,90 @@
     </form>
   </div>
 
-  <!-- 2. TELA DE LOADING (TRIÂNGULO PROCESSANDO) -->
+  <!-- TELA DE LOADING -->
   <div id="loading-screen" class="loading-box hidden">
-    <div class="triangle-spinner">▲</div>
+    <div style="font-size: 3rem; color: var(--agency-color); margin-bottom: 10px;">▲</div>
     <h2>PROCESSANDO...</h2>
-    <div id="loading-status" class="loading-status">VERIFICANDO LEALDADE DA MENTE...</div>
+    <div id="loading-status" style="font-size: 0.8rem; font-weight: bold; color: var(--agency-color);">VERIFICANDO LEALDADE DA MENTE...</div>
   </div>
 
-  <!-- 3. PORTAL INTERNO -->
+  <!-- PORTAL INTERNO -->
   <div id="portal-screen" class="hidden">
     <div class="header">
       <h1>▲ TRIANGLE AGENCY</h1>
       <div class="user-bar">
         <span>USUÁRIO: <strong id="logged-user-id" style="color: var(--agency-color);">---</strong></span>
         <div>
-          <span>NÍVEL DE ACESSO: <strong id="logged-clearance" style="color: var(--agency-color);">---</strong></span>
+          <span>NÍVEL: <strong id="logged-clearance" style="color: var(--agency-color);">---</strong></span>
           <button onclick="logout()" class="btn-logout">SAIR [X]</button>
         </div>
       </div>
     </div>
 
-    <!-- MENU DE ABAS DE NAVEGAÇÃO -->
+    <!-- MENU DE ABAS -->
     <nav class="nav-menu">
       <a href="index.html" class="nav-link active">INÍCIO</a>
-      <a href="relatorios.html" class="nav-link">ANOMALIAS</a>
-      <a href="agentes.html" class="nav-link">EQUIPE</a>
+      <a href="agentes.html" class="nav-link">EQUIPES & PESSOAL</a>
     </nav>
 
-    <!-- Conteúdo da Página Inicial -->
-    <div class="card agency-border" data-min-clearance="1">
-      <span class="agency-tag">DIRETRIZ DA AGÊNCIA</span>
-      <h3 style="color: var(--agency-color); margin-top: 10px;">Bem-vindo ao Sistema Interno</h3>
-      <p>Utilize as abas acima para navegar pelos relatórios e arquivos de pessoal. Lembre-se de manter a confidencialidade fora do expediente.</p>
+    <!-- PAINEL EXCLUSIVO DO GERENTE: CRIAR MISSÃO -->
+    <div id="manager-panel" class="card agency-border hidden" data-min-clearance="3">
+      <span class="agency-tag">PAINEL DE GERÊNCIA // ATRIBUIR MISSÃO</span>
+      <h3 style="color: var(--agency-color); margin-top: 10px;">Designar Nova Operação</h3>
+      
+      <form onsubmit="salvarNovaMissao(event)">
+        <div class="input-group">
+          <label for="mission-title">TÍTULO DA MISSÃO / INCIDENTE:</label>
+          <input type="text" id="mission-title" placeholder="Ex: Resgate de Objeto no 4º Andar" required>
+        </div>
+
+        <div class="input-group">
+          <label for="mission-type">CATEGORIA:</label>
+          <select id="mission-type">
+            <option value="anomaly">Anomalia (Azul)</option>
+            <option value="agency">Diretriz da Agência (Vermelho)</option>
+            <option value="mundane">Assunto Mundano (Amarelo)</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="mission-agent">DESIGNAR PARA O FUNCIONÁRIO:</label>
+          <select id="mission-agent" required>
+            <!-- Opções preenchidas dinamicamente pelo JS -->
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="mission-desc">INSTRUÇÕES E DETALHES:</label>
+          <textarea id="mission-desc" rows="3" placeholder="Descreva os procedimentos e restrições da operação..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">PUBLICAR MISSÃO NO SISTEMA</button>
+      </form>
     </div>
 
-    <!-- AVISO MUNDANO DINÂMICO -->
-    <div class="card mundane-border" data-min-clearance="1">
+    <!-- BOLETIM DE ROTINA CIVIL (AVISO ALEATÓRIO) -->
+    <div class="card mundane-border">
       <span class="mundane-tag">BOLETIM DE ROTINA CIVIL</span>
       <h3 style="color: var(--mundane-color); margin-top: 10px;">Aviso Corporativo do Dia</h3>
       <p id="texto-aviso-mundano">Carregando diretriz diária...</p>
     </div>
 
-    <!-- Exemplo para Nível 3 (Supervisores) -->
-    <div class="card anomaly-border" data-min-clearance="3">
-      <span class="anomaly-tag">CONFIDENCIAL // GERÊNCIA</span>
-      <h3 style="color: var(--anomaly-color); margin-top: 10px;">Aviso de Segurança Nível 3</h3>
-      <p>Apenas supervisores conseguem ler este aviso no portal.</p>
+    <!-- CONTAINER DAS MISSÕES DO AGENTE LOGADO -->
+    <div id="lista-missoes">
+      <!-- Missões salvas serão renderizadas aqui -->
     </div>
   </div>
 
-  <!-- Banco de dados de usuários -->
   <script src="usuarios.js"></script>
 
-  <!-- Scripts do Portal -->
   <script>
-    // LISTA DE AVISOS MUNDANOS ABSURDOS
     const AVISOS_MUNDANOS = [
-      "Favor não armazenar marmitas contendo peixe ou conceitos abstratos na geladeira comunitária do 2º andar.",
-      "Lembrete: O café da máquina é cortesia da empresa. Se ele começar a sussurrar seu nome em latim, descarte o copo no lixo reciclável.",
-      "As reuniões de alinhamento às sextas-feiras foram movidas para a quarta dimensão. Favor trazerem seus próprios crachás de ancoragem.",
-      "Solicita-se que os funcionários parem de tentar 'fazer amizade' com a fotocopiadora. Ela é apenas um eletrodoméstico (por enquanto).",
-      "O RH informa: Chorar no banheiro é permitido apenas durante o horário de almoço ou em blocos de 5 minutos devidamente apontados no ponto.",
-      "Aviso da Limpeza: Não usem o elevador número 3. Ele atualmente só leva a instâncias do ano de 1974.",
-      "Lembrete de RH: Elogiar a Agência em voz alta ao menos 3 vezes ao dia melhora o clima organizacional e reduz acidentes corporativos.",
-      "Por favor, mantenham a porta do arquivo mortuário trancada. Os papéis velhos não gostam de correntes de ar e tendem a se mover.",
-      "A taxa de uso de canetas corporativas excedeu a cota. Lembre-se: Roubar material da Agência é roubar de si mesmo."
-    ];
-
-    const MENSAGENS_LOADING = [
-      "VERIFICANDO LEALDADE DA MENTE...",
-      "CALIBRANDO NÍVEL DE LIMPEZA DE MEMÓRIA...",
-      "CONSULTANDO A DIRETORIA DA AGÊNCIA...",
-      "SINCRONIZANDO COM A MATRIZ..."
+      "Favor não armazenar marmitas contendo peixe ou conceitos abstratos na geladeira comunitária.",
+      "Lembrete: O café da máquina é cortesia. Se ele sussurrar seu nome em latim, descarte o copo.",
+      "As reuniões de alinhamento foram movidas para a quarta dimensão. Traga seu crachá de ancoragem.",
+      "Solicita-se que parem de tentar 'fazer amizade' com a fotocopiadora.",
+      "Chorar no banheiro é permitido apenas durante o almoço ou em blocos de 5 minutos apontados no ponto."
     ];
 
     function sortearAvisoMundano() {
@@ -141,45 +119,119 @@
       document.getElementById('texto-aviso-mundano').innerText = AVISOS_MUNDANOS[index];
     }
 
-    function iniciarLogin(event) {
+    function popularDropdownAgentes() {
+      const select = document.getElementById('mission-agent');
+      select.innerHTML = '<option value="TODOS">-- TODOS OS AGENTES (GERAL) --</option>';
+      
+      if (typeof AGENTES_AUTORIZADOS !== 'undefined') {
+        for (let id in AGENTES_AUTORIZADOS) {
+          if (AGENTES_AUTORIZADOS[id].clearance < 3) { // Apenas funcionários comuns
+            select.innerHTML += `<option value="${id}">${AGENTES_AUTORIZADOS[id].nome} (${id})</option>`;
+          }
+        }
+      }
+    }
+
+    function salvarNovaMissao(event) {
       event.preventDefault();
       
+      const novaMissao = {
+        id: 'MIS-' + Date.now().toString().slice(-4),
+        titulo: document.getElementById('mission-title').value,
+        tipo: document.getElementById('mission-type').value,
+        designadoPara: document.getElementById('mission-agent').value,
+        descricao: document.getElementById('mission-desc').value,
+        data: new Date().toLocaleDateString('pt-BR')
+      };
+
+      let missoes = JSON.parse(localStorage.getItem('triangle_missions') || '[]');
+      missoes.unshift(novaMissao);
+      localStorage.setItem('triangle_missions', JSON.stringify(missoes));
+
+      alert("MISSÃO REGISTRADA COM SUCESSO NO SISTEMA!");
+      document.getElementById('mission-title').value = '';
+      document.getElementById('mission-desc').value = '';
+      
+      const currentUserId = localStorage.getItem('triangle_user_id');
+      const userClearance = parseInt(localStorage.getItem('triangle_user_clearance'));
+      renderizarMissoes(currentUserId, userClearance);
+    }
+
+    function renderizarMissoes(userId, clearance) {
+      const container = document.getElementById('lista-missoes');
+      let missoes = JSON.parse(localStorage.getItem('triangle_missions') || '[]');
+
+      // Se não houver missões salvas, insere uma missão inicial padrão
+      if (missoes.length === 0) {
+        missoes = [{
+          id: 'MIS-0001',
+          titulo: 'Coleta Inicial: Objeto #089',
+          tipo: 'anomaly',
+          designadoPara: 'AG-7042',
+          descricao: 'Localizar e conter o lápis anômalo no 2º andar antes do encerramento do expediente.',
+          data: '01/09/2026'
+        }];
+        localStorage.setItem('triangle_missions', JSON.stringify(missoes));
+      }
+
+      container.innerHTML = '<h2>▲ SUAS MISSÕES & TAREFAS DESIGNADAS</h2>';
+
+      let missoesEncontradas = 0;
+
+      missoes.forEach(m => {
+        // Regra de Acesso:
+        // Gerentes (Clearance >= 3) vêm TUDO.
+        // Agentes normais só veem se for para "TODOS" ou se for especificamente para o seu ID.
+        if (clearance >= 3 || m.designadoPara === 'TODOS' || m.designadoPara === userId) {
+          missoesEncontradas++;
+          
+          let classeBorda = m.tipo === 'anomaly' ? 'anomaly-border' : (m.tipo === 'agency' ? 'agency-border' : 'mundane-border');
+          let classeTag = m.tipo === 'anomaly' ? 'anomaly-tag' : (m.tipo === 'agency' ? 'agency-tag' : 'mundane-tag');
+          let nomeTipo = m.tipo === 'anomaly' ? 'ANOMALIA' : (m.tipo === 'agency' ? 'DIRETRIZ DA AGÊNCIA' : 'AVISO MUNDANO');
+
+          container.innerHTML += `
+            <div class="card ${classeBorda}">
+              <span class="${classeTag}">${nomeTipo} // ${m.id}</span>
+              <h3 style="margin-top: 10px;">${m.titulo}</h3>
+              <p>${m.descricao}</p>
+              <div class="assigned-badge">DESIGNADO PARA: ${m.designadoPara}</div>
+              <small style="display:block; margin-top:8px; color:#888;">Data de Emissão: ${m.data}</small>
+            </div>
+          `;
+        }
+      });
+
+      if (missoesEncontradas === 0) {
+        container.innerHTML += `<div class="card"><p>Nenhuma missão individual pendente no momento. Aguarde instruções da Gerência.</p></div>`;
+      }
+    }
+
+    function iniciarLogin(event) {
+      event.preventDefault();
       const inputId = document.getElementById('agent-id').value.trim().toUpperCase();
       const inputPass = document.getElementById('passcode').value.trim();
 
       if (typeof AGENTES_AUTORIZADOS !== 'undefined' && AGENTES_AUTORIZADOS[inputId] && AGENTES_AUTORIZADOS[inputId].passcode === inputPass) {
         const agente = AGENTES_AUTORIZADOS[inputId];
-        
-        // Esconde o Login e Exibe o Loading do Triângulo
+
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('loading-screen').classList.remove('hidden');
 
-        // Alterna mensagens durante o loading
-        let msgIndex = 0;
-        const statusEl = document.getElementById('loading-status');
-        const interval = setInterval(() => {
-          msgIndex = (msgIndex + 1) % MENSAGENS_LOADING.length;
-          statusEl.innerText = MENSAGENS_LOADING[msgIndex];
-        }, 600);
-
-        // Tempo total do loading antes de entrar no portal (2.2 segundos)
         setTimeout(() => {
-          clearInterval(interval);
           localStorage.setItem('triangle_user_id', inputId);
           localStorage.setItem('triangle_user_name', agente.nome);
           localStorage.setItem('triangle_user_clearance', agente.clearance);
           localStorage.setItem('triangle_user_cargo', agente.cargo);
 
           document.getElementById('loading-screen').classList.add('hidden');
-          carregarPainel(agente);
-        }, 2200);
-
+          carregarPainel(agente, inputId);
+        }, 1500);
       } else {
         alert("ACESSO NEGADO // CREDENCIAIS INVÁLIDAS");
       }
     }
 
-    function carregarPainel(agente) {
+    function carregarPainel(agente, userId) {
       document.getElementById('logged-user-id').innerText = `${agente.nome} (${agente.cargo})`;
       document.getElementById('logged-clearance').innerText = `NÍVEL ${agente.clearance}`;
       
@@ -187,24 +239,28 @@
       document.getElementById('portal-screen').classList.remove('hidden');
 
       sortearAvisoMundano();
+      popularDropdownAgentes();
       aplicarRestricoesDeAcesso(agente.clearance);
+      renderizarMissoes(userId, agente.clearance);
     }
 
     function aplicarRestricoesDeAcesso(clearance) {
       const elementosRestritos = document.querySelectorAll('[data-min-clearance]');
-      
       elementosRestritos.forEach(el => {
         const nivelExigido = parseInt(el.getAttribute('data-min-clearance'));
         if (clearance < nivelExigido) {
-          el.style.display = 'none';
+          el.classList.add('hidden');
         } else {
-          el.style.display = 'block';
+          el.classList.remove('hidden');
         }
       });
     }
 
     function logout() {
-      localStorage.clear();
+      localStorage.removeItem('triangle_user_id');
+      localStorage.removeItem('triangle_user_name');
+      localStorage.removeItem('triangle_user_clearance');
+      localStorage.removeItem('triangle_user_cargo');
       window.location.reload();
     }
 
@@ -224,7 +280,7 @@
 
       const savedId = localStorage.getItem('triangle_user_id');
       if (savedId && typeof AGENTES_AUTORIZADOS !== 'undefined' && AGENTES_AUTORIZADOS[savedId]) {
-        carregarPainel(AGENTES_AUTORIZADOS[savedId]);
+        carregarPainel(AGENTES_AUTORIZADOS[savedId], savedId);
       }
     };
   </script>
