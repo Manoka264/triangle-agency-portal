@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRIANGLE AGENCY // EQUIPES E PESSOAL</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <button class="theme-toggle" onclick="toggleTheme()">MODO ESCURO</button>
+
+  <div class="header">
+    <h1>▲ TRIANGLE AGENCY</h1>
+    <div class="user-bar">
+      <span>USUÁRIO: <strong id="logged-user-id" style="color: var(--agency-color);">---</strong></span>
+      <div>
+        <span>NÍVEL: <strong id="logged-clearance" style="color: var(--agency-color);">---</strong></span>
+        <button onclick="logout()" class="btn-logout">SAIR [X]</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav-menu">
+    <a href="index.html" class="nav-link">INÍCIO</a>
+    <a href="agentes.html" class="nav-link active">EQUIPES & PESSOAL</a>
+  </nav>
+
+  <h2>▲ REGISTRO DE RECURSOS HUMANOS</h2>
+
+  <!-- Visão Geral de Equipe (Todos vêm) -->
+  <div class="card agency-border">
+    <span class="agency-tag">ESTRUTURA DA FILIAL</span>
+    <h3 style="color: var(--agency-color); margin-top: 10px;">Divisão de Operações Locais</h3>
+    <p>Todos os funcionários listados abaixo estão sob supervisão direta do departamento de Qualidade da Agência.</p>
+  </div>
+
+  <!-- Container onde as fichas serão renderizadas dinamicamente -->
+  <div id="lista-equipes"></div>
+
+  <script src="usuarios.js"></script>
+
+  <script>
+    function carregarListaEquipe() {
+      const container = document.getElementById('lista-equipes');
+      const clearance = parseInt(localStorage.getItem('triangle_user_clearance') || '1');
+      
+      container.innerHTML = '';
+
+      if (typeof AGENTES_AUTORIZADOS !== 'undefined') {
+        for (let id in AGENTES_AUTORIZADOS) {
+          const agente = AGENTES_AUTORIZADOS[id];
+
+          // Se for agente comum, esconde detalhes confidenciais
+          if (clearance < 3) {
+            container.innerHTML += `
+              <div class="card mundane-border">
+                <span class="mundane-tag">FUNCIONÁRIO DE CAMPO</span>
+                <h3 style="margin-top: 10px;">${agente.nome}</h3>
+                <p><strong>Cargo:</strong> ${agente.cargo}</p>
+                <p><strong>Identificador:</strong> ${id}</p>
+              </div>
+            `;
+          } else {
+            // Se for GERENTE (Nível 3), exibe dossiê completo de gestão
+            container.innerHTML += `
+              <div class="card agency-border">
+                <span class="agency-tag">DOSSIÊ DE GERÊNCIA // CONFIDENCIAL</span>
+                <h3 style="color: var(--agency-color); margin-top: 10px;">${agente.nome} (${id})</h3>
+                <p><strong>Cargo:</strong> ${agente.cargo}</p>
+                <p><strong>Nível de Acesso:</strong> Nível ${agente.clearance}</p>
+                <p><strong>Senha Registrada:</strong> <code style="background:#e2ded4; padding:2px 4px; color:#000;">${agente.passcode}</code></p>
+                <p><strong>Status de Desempenho:</strong> Estável / Monitorado</p>
+              </div>
+            `;
+          }
+        }
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('triangle_theme', isDark ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').innerText = isDark ? 'MODO CLARO' : 'MODO ESCURO';
+    }
+
+    window.onload = function() {
+      const savedTheme = localStorage.getItem('triangle_theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle').innerText = 'MODO CLARO';
+      }
+
+      const savedName = localStorage.getItem('triangle_user_name');
+      const savedCargo = localStorage.getItem('triangle_user_cargo');
+      const savedClearance = localStorage.getItem('triangle_user_clearance');
+
+      if (!savedName) {
+        window.location.href = 'index.html'; // Força login se tentar acessar direto
+      } else {
+        document.getElementById('logged-user-id').innerText = `${savedName} (${savedCargo})`;
+        document.getElementById('logged-clearance').innerText = `NÍVEL ${savedClearance}`;
+        carregarListaEquipe();
+      }
+    };
+  </script>
+</body>
+</html>
