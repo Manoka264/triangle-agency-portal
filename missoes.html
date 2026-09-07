@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRIANGLE AGENCY // REGISTRO DE MISSÕES</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <button class="theme-toggle" onclick="toggleTheme()">MODO ESCURO</button>
+
+  <div class="header">
+    <h1>▲ TRIANGLE AGENCY</h1>
+    <div class="user-bar">
+      <span>USUÁRIO: <strong id="logged-user-id" style="color: var(--agency-color);">---</strong></span>
+      <div>
+        <span>NÍVEL: <strong id="logged-clearance" style="color: var(--agency-color);">---</strong></span>
+        <button onclick="logout()" class="btn-logout">SAIR [X]</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav-menu">
+    <a href="index.html" class="nav-link">INÍCIO</a>
+    <a href="missoes.html" class="nav-link active">MISSÕES</a>
+    <a href="agentes.html" class="nav-link">EQUIPES & PESSOAL</a>
+  </nav>
+
+  <!-- FORMULÁRIO DE CRIAÇÃO (EXCLUSIVO GERÊNCIA - NÍVEL 3) -->
+  <div id="manager-create-panel" class="card agency-border hidden" data-min-clearance="3">
+    <span class="agency-tag">PAINEL DE GERÊNCIA // CRIAR OPERAÇÃO</span>
+    <h3 style="color: var(--agency-color); margin-top: 10px;">Designar Nova Missão</h3>
+    
+    <form onsubmit="salvarNovaMissao(event)">
+      <div class="input-group">
+        <label for="m-title">TÍTULO DA OPERAÇÃO:</label>
+        <input type="text" id="m-title" placeholder="Ex: Contenção de Anomalia Escolar" required>
+      </div>
+
+      <div class="input-group">
+        <label for="m-type">CATEGORIA:</label>
+        <select id="m-type">
+          <option value="anomaly">Anomalia (Azul)</option>
+          <option value="agency">Diretriz da Agência (Vermelho)</option>
+          <option value="mundane">Assunto Mundano (Amarelo)</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>DESIGNAR AGENTES ENVOLVIDOS (MÚLTIPLOS):</label>
+        <div id="checkboxes-agentes" class="checkbox-list">
+          <!-- Checkboxes preenchidos via JS -->
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="m-desc">INSTRUÇÕES DA MISSÃO:</label>
+        <textarea id="m-desc" rows="3" placeholder="Descreva os objetivos principais..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">PUBLICAR MISSÃO</button>
+    </form>
+  </div>
+
+  <h2>▲ ARCHIVO DE OPERAÇÕES DA AGÊNCIA</h2>
+
+  <!-- LISTA DE MISSÕES -->
+  <div id="container-missoes"></div>
+
+  <script src="usuarios.js"></script>
+
+  <script>
+    function renderCheckboxesAgentes() {
+      const container = document.getElementById('checkboxes-agentes');
+      container.innerHTML = `
+        <label class="checkbox-item">
+          <input type="checkbox" value="TODOS" id="chk-todos" onchange="toggleTodosAgentes(this)">
+          <strong>-- TODOS OS AGENTES --</strong>
+        </label>
+      `;
+
+      if (typeof AGENTES_AUTORIZADOS !== 'undefined') {
+        for (let id in AGENTES_AUTORIZADOS) {
+          if (AGENTES_AUTORIZADOS[id].clearance < 3) {
+            container.innerHTML += `
+              <label class="checkbox-item">
+                <input type="checkbox" name="agente_designado" value="${id}" class="chk-agente">
+                ${AGENTES_AUTORIZADOS[id].nome} (${id})
+              </label>
+            `;
+          }
+        }
+      }
+    }
+
+    function toggleTodosAgentes(mainChk) {
+      document.querySelectorAll('.chk-agente').forEach(chk => chk.checked = mainChk.checked);
+    }
+
+    function salvarNovaMissao(event) {
+      event.preventDefault();
+
+      let selecionados = [];
+      if (document.getElementById('chk-todos').checked) {
+        selecionados = ['TODOS'];
+      } else {
+        document.querySelectorAll('.chk-agente:checked').forEach(chk => selecionados.push(chk.value));
+      }
+
+      if (selecionados.length === 0) {
+        alert("Selecione pelo menos um agente ou a opção 'TODOS'.");
+        return;
+      }
+
+      const novaMissao = {
+        id: 'MIS-' + Date.now().toString().slice(-4),
+        titulo: document.getElementById('m-title').value,
+        tipo: document.getElementById('m-type').value,
+        designados: selecionados,
+        descricao: document.getElementById('m-desc').value,
+        status: 'Em Andamento',
+        relatorioImg: null,
+        feedbackGerente: '',
+        data: new Date().toLocaleDateString('pt-BR')
+      };
+
+      let missoes = JSON.parse(localStorage.getItem('triangle_missions') || '[]');
+      missoes.unshift(novaMissao);
+      localStorage.setItem('triangle_missions', JSON.stringify(missoes));
+
+      alert("Missão registrada!");
+      window.location.reload();
+    }
+
+    function deletarMissao(idMissao) {
+      if (confirm("Tem certeza que deseja apagar esta missão do arquivo?")) {
+        let missoes = JSON.parse(localStorage.getItem('triangle_missions') || '[]');
+        missoes = missoes.filter(m => m.id !== idMissao);
+        localStorage.setItem('triangle_missions', JSON.stringify(missoes));
+        renderizarMissoes();
+      }
+    }
+
+    function concluirMissaoForm(idMissao) {
+      const feedback = prompt("Digite o Parecer / Feedback Final do Gerente:");
+      if (feedback === null) return;
+
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/png, image/jpeg';
+
+      alert("Selecione a imagem (PNG) do Relatório Final da Missão.");
+
+      fileInput.onchange = e => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = readerEvent => {
+            const base64Image = readerEvent.target.result;
+            
+            let missoes = JSON.parse(localStorage.getItem('triangle_missions') || '[]');
+            const index = missoes.findIndex(m => m.id === idMissao);
+            if (index !== -1) {
+              missoes[index].status = 'Concluída';
+              missoes[index].feedbackGerente = feedback;
+              missoes[index].relatorioImg = base64Image;
+              localStorage.setItem('triangle_missions', JSON.stringify(missoes));
+              alert("Missão encerrada e relatório arquivado!");
+              renderizarMissoes();
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      fileInput.click();
+    }
+
+    function renderizarMissoes() {
+      const container = document.getElementById('container-missoes');
+      const userId = localStorage.getItem('triangle_user_id');
+      const clearance = parseInt(localStorage.getItem('triangle_user_clearance') || '1');
+      let missoes = JSON.parse(localStorage.getItem('triangle_missions') || '[]');
+
+      container.innerHTML = '';
+
+      missoes.forEach(m => {
+        const eDesignado = m.designados.includes('TODOS') || m.designados.includes(userId);
+        
+        if (clearance >= 3 || eDesignado) {
+          let borda = m.tipo === 'anomaly' ? 'anomaly-border' : (m.tipo === 'agency' ? 'agency-border' : 'mundane-border');
+          let tag = m.tipo === 'anomaly' ? 'anomaly-tag' : (m.tipo === 'agency' ? 'agency-tag' : 'mundane-tag');
+          let statusClasse = m.status === 'Concluída' ? 'status-concluida' : 'status-andamento';
+
+          let botoesGerente = '';
+          if (clearance >= 3) {
+            botoesGerente = `
+              <div style="margin-top: 10px; display: flex; gap: 8px;">
+                ${m.status !== 'Concluída' ? `<button onclick="concluirMissaoForm('${m.id}')" class="btn-action">ANEXAR RELATÓRIO / CONCLUIR</button>` : ''}
+                <button onclick="deletarMissao('${m.id}')" class="btn-danger">EXCLUIR [X]</button>
+              </div>
+            `;
+          }
+
+          let relatorioHTML = '';
+          if (m.status === 'Concluída') {
+            relatorioHTML = `
+              <div class="manager-feedback-box">
+                <strong>PARECER DA GERÊNCIA:</strong><br>"${m.feedbackGerente || 'Sem observações.'}"
+              </div>
+            `;
+            if (m.relatorioImg) {
+              relatorioHTML += `
+                <div style="margin-top: 10px;">
+                  <strong style="font-size:0.8rem;">ANEXO: RELATÓRIO DE CAMPO (PNG)</strong><br>
+                  <img src="${m.relatorioImg}" class="report-img" alt="Relatório Oficial">
+                </div>
+              `;
+            }
+          }
+
+          container.innerHTML += `
+            <div class="card ${borda}">
+              <span class="${tag}">${m.id}</span>
+              <span class="status-badge ${statusClasse}">${m.status.toUpperCase()}</span>
+              
+              <h3 style="margin-top: 10px;">${m.titulo}</h3>
+              <p>${m.descricao}</p>
+              
+              <div class="assigned-badge">DESIGNADO PARA: ${m.designados.join(', ')}</div>
+              <small style="display:block; margin-top:5px; color:#888;">Emissão: ${m.data}</small>
+              
+              ${relatorioHTML}
+              ${botoesGerente}
+            </div>
+          `;
+        }
+      });
+
+      if (container.innerHTML === '') {
+        container.innerHTML = `<div class="card"><p>Nenhuma missão registrada para seu perfil.</p></div>`;
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('triangle_theme', isDark ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').innerText = isDark ? 'MODO CLARO' : 'MODO ESCURO';
+    }
+
+    window.onload = function() {
+      const savedTheme = localStorage.getItem('triangle_theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle').innerText = 'MODO CLARO';
+      }
+
+      const savedName = localStorage.getItem('triangle_user_name');
+      const savedCargo = localStorage.getItem('triangle_user_cargo');
+      const savedClearance = localStorage.getItem('triangle_user_clearance');
+
+      if (!savedName) {
+        window.location.href = 'index.html';
+      } else {
+        document.getElementById('logged-user-id').innerText = `${savedName} (${savedCargo})`;
+        document.getElementById('logged-clearance').innerText = `NÍVEL ${savedClearance}`;
+
+        if (parseInt(savedClearance) >= 3) {
+          document.getElementById('manager-create-panel').classList.remove('hidden');
+          renderCheckboxesAgentes();
+        }
+
+        renderizarMissoes();
+      }
+    };
+  </script>
+</body>
+</html>
