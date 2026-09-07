@@ -143,4 +143,20 @@ h1 { color: var(--agency-color); margin: 0 0 5px 0; font-size: 1.8rem; }
   color: var(--agency-color);
 }
 
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--agency-color);
+  color: var(--agency-color);
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  margin-left: 10px;
+}
+
+.btn-logout:hover {
+  background: var(--agency-color);
+  color: #ffffff;
+}
+
 .hidden { display: none; }
